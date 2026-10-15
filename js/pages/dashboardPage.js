@@ -24,8 +24,7 @@ async function init() {
 
   const areasPreload = preloadAvailableAreas(session.token, session.userId)
     .catch((error) => {
-      const reason = error && error.message ? ` (${error.message})` : "";
-      setMessage(`No se pudieron precargar las áreas${reason}; se intentará cargarlas al abrir Check list.`, "error");
+      console.error("No se pudieron precargar las áreas; se intentará cargarlas al abrir Check list.", error);
       return null;
     });
 
