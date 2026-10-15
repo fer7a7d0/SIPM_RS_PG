@@ -365,7 +365,7 @@ function renderDetail(data) {
     <p><strong>Inicio:</strong> ${formattedDate} ${formattedStartTime}</p>
     <p><strong>Fin:</strong> ${formattedEndDateTime}</p>
     <p><strong>Duracion:</strong> ${supervision.duracion || "-"}</p>
-    <p><strong>GPS:</strong> ${supervision.gps || "-"}</p>
+    <p><strong>GPS:</strong> ${supervision.gps || "S/R"}</p>
   `;
   detailBody.appendChild(summary);
 

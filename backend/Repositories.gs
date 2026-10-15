@@ -200,9 +200,6 @@ function findSupervisionById(supervisionId) {
         area = String(row[6] || "").trim();
       }
       var gps = String(row[9] || "").trim();
-      if (!gps) {
-        gps = String(row[7] || "").trim();
-      }
 
       return {
         id: id,
@@ -681,9 +678,6 @@ function listSupervisionsWithFilters(filters) {
       areaId = String(row[6] || "").trim();
     }
     var gps = String(row[9] || "").trim();
-    if (!gps) {
-      gps = String(row[7] || "").trim();
-    }
 
     var item = {
       id: String(row[0] || "").trim(),
