@@ -1,7 +1,7 @@
 import "../router.js";
 import { ROUTES } from "../config.js";
 import { getSession } from "../services/authService.js";
-import { listAvailableAreas, startSupervision } from "../services/supervisionService.js";
+import { clearActiveSupervision, listAvailableAreas, updateActiveSupervision } from "../services/supervisionService.js";
 
 const areaSelect = document.getElementById("areaSelect");
 const checkListMessage = document.getElementById("checkListMessage");
@@ -48,19 +48,24 @@ async function onAreaChange(session) {
 
   const selectedArea = areaSelect.options[areaSelect.selectedIndex];
   areaSelect.disabled = true;
-  setMessage(`Registrando inicio para ${selectedArea.textContent}...`, "");
+  setMessage(`Abriendo checklist para ${selectedArea.textContent}...`, "");
 
   try {
-    await startSupervision({
-      token: session.token,
+    clearActiveSupervision();
+    updateActiveSupervision({
       areaId,
-      startMode: "area"
+      areaName: selectedArea.textContent,
+      qrCode: "",
+      supervisorId: session.userId || "",
+      gps: "",
+      startMode: "area",
+      startAt: new Date().toISOString()
     });
     window.location.href = ROUTES.supervision;
   } catch (error) {
     areaSelect.disabled = false;
     areaSelect.value = "";
-    setMessage(error.message || "No se pudo iniciar la supervisión.", "error");
+    setMessage(error.message || "No se pudo abrir el checklist.", "error");
   }
 }
 
