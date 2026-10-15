@@ -3,7 +3,6 @@ import { ROUTES } from "../config.js";
 import { getSession, logout } from "../services/authService.js";
 import {
   clearCachedAvailableAreas,
-  getCachedAvailableAreas,
   preloadAvailableAreas
 } from "../services/supervisionService.js";
 
@@ -40,12 +39,7 @@ async function init() {
   indicadoresBtn.addEventListener("click", () => {
     window.location.href = ROUTES.indicadores;
   });
-  checkListBtn.addEventListener("click", async () => {
-    checkListBtn.disabled = true;
-    if (!getCachedAvailableAreas(session.userId)) {
-      setMessage("Preparando áreas...", "");
-    }
-    await areasPreload;
+  checkListBtn.addEventListener("click", () => {
     window.location.href = ROUTES.checkList;
   });
 }
