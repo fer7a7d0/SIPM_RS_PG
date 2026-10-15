@@ -1,7 +1,12 @@
 import "../router.js";
 import { ROUTES } from "../config.js";
 import { getSession } from "../services/authService.js";
-import { clearActiveSupervision, listAvailableAreas, updateActiveSupervision } from "../services/supervisionService.js";
+import {
+  clearActiveSupervision,
+  getCachedAvailableAreas,
+  listAvailableAreas,
+  updateActiveSupervision
+} from "../services/supervisionService.js";
 
 const areaSelect = document.getElementById("areaSelect");
 const checkListMessage = document.getElementById("checkListMessage");
@@ -18,7 +23,7 @@ async function init() {
   areaSelect.addEventListener("change", () => onAreaChange(session));
 
   try {
-    const areas = await listAvailableAreas(session.token);
+    const areas = getCachedAvailableAreas(session.userId) || await listAvailableAreas(session.token);
     areaSelect.innerHTML = '<option value="">Selecciona un área...</option>';
 
     areas.forEach((area) => {
