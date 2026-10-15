@@ -40,7 +40,8 @@ async function init() {
 
   areaNameEl.textContent = activeSupervision.areaName;
   startTimeEl.textContent = `Hora inicio: ${formatTimeEs(activeSupervision.startAt)}`;
-  gpsTextEl.textContent = `GPS: ${activeSupervision.gps}`;
+  gpsTextEl.textContent = activeSupervision.gps ? `GPS: ${activeSupervision.gps}` : "";
+  gpsTextEl.hidden = !activeSupervision.gps;
 
   continueChecklistBtn.disabled = true;
   continueChecklistBtn.addEventListener("click", onContinue);

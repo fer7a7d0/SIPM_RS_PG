@@ -12,7 +12,7 @@
 ## Fase 3
 - Escaneo QR por camara y entrada manual como respaldo.
 - Validacion de area contra hoja Areas.
-- Captura GPS obligatoria al iniciar supervision.
+- Captura GPS obligatoria al iniciar desde QR; el inicio por seleccion de area no requiere GPS.
 - Registro de inicio en hoja Supervisiones.
 - Redireccion automatica a pantalla de Supervision.
 

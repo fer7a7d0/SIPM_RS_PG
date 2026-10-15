@@ -17,7 +17,8 @@ function init() {
   session = getSession();
   active = getActiveSupervision();
 
-  if (!session || !active || !active.areaId || !active.operatorId || !active.gps || !active.startAt || !active.answers) {
+  const gpsIsRequired = active && active.startMode !== "area";
+  if (!session || !active || !active.areaId || !active.operatorId || (gpsIsRequired && !active.gps) || !active.startAt || !active.answers) {
     window.location.replace(ROUTES.dashboard);
     return;
   }
@@ -73,6 +74,7 @@ async function onSave() {
       operatorId: active.operatorId,
       operatorName: active.operatorName || "",
       gps: active.gps,
+      startMode: active.startMode,
       startAt: active.startAt,
       answers: payloadAnswers
     });

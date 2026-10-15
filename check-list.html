@@ -20,13 +20,21 @@
         <header class="d-flex justify-content-between align-items-start gap-3 mb-3">
           <div>
             <p class="eyebrow mb-1">Check list</p>
-            <h1 class="title-lg">Check list</h1>
+            <h1 class="title-lg">Selecciona un área</h1>
           </div>
           <a class="btn btn-outline-dark btn-sm" href="dashboard.html">Volver</a>
         </header>
+
+        <div>
+          <label for="areaSelect" class="form-label">Área</label>
+          <select id="areaSelect" class="form-select form-select-lg" disabled>
+            <option value="">Cargando áreas...</option>
+          </select>
+        </div>
+        <div id="checkListMessage" class="status-slot mt-3" aria-live="polite"></div>
       </section>
     </main>
 
-    <script type="module" src="js/router.js"></script>
+    <script type="module" src="js/pages/checkListPage.js"></script>
   </body>
 </html>

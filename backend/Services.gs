@@ -796,6 +796,7 @@ function supervisionStartService(payload) {
       qrCode: area.qrCode,
       supervisorId: session.userId,
       gps: String(payload.gps || "").trim(),
+      startMode: String(payload.startMode || "").trim().toLowerCase() === "area" ? "area" : "qr",
       startAt: now.toISOString()
     }
   };

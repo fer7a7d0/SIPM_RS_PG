@@ -58,12 +58,16 @@ function validateSupervisionStartPayload(payload) {
 
   var areaId = String((payload && payload.areaId) || "").trim();
   var qrCode = String((payload && payload.qrCode) || "").trim();
+  var startMode = String((payload && payload.startMode) || "").trim().toLowerCase();
   if (!areaId && !qrCode) {
     throw buildError("Area o codigo QR requerido para iniciar supervision", "BAD_REQUEST");
   }
+  if (startMode === "area" && !areaId) {
+    throw buildError("Area requerida para iniciar supervision sin GPS", "BAD_REQUEST");
+  }
 
   var gps = String((payload && payload.gps) || "").trim();
-  if (!gps) {
+  if (!gps && startMode !== "area") {
     throw buildError("GPS requerido para iniciar supervision", "BAD_REQUEST");
   }
 }
@@ -86,7 +90,8 @@ function validateSupervisionSavePayload(payload) {
   }
 
   var gps = String((payload && payload.gps) || "").trim();
-  if (!gps) {
+  var startMode = String((payload && payload.startMode) || "").trim().toLowerCase();
+  if (!gps && startMode !== "area") {
     throw buildError("GPS requerido para guardar", "BAD_REQUEST");
   }
 
