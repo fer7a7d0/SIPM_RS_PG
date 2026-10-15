@@ -23,6 +23,22 @@ export async function verifySession() {
   }
 }
 
+export async function refreshBirthdayStatus() {
+  const session = getSession();
+  if (!session || !session.token) {
+    return false;
+  }
+
+  const data = await apiRequest("auth.session", { token: session.token });
+  const refreshedSession = data.session;
+  if (!refreshedSession || refreshedSession.userId !== session.userId) {
+    throw new Error("No se pudo verificar el usuario de la sesión.");
+  }
+
+  setJson(STORAGE_KEYS.session, refreshedSession);
+  return Boolean(refreshedSession.isBirthdayToday);
+}
+
 export function getSession() {
   return getJson(STORAGE_KEYS.session);
 }

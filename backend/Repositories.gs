@@ -8,7 +8,8 @@ function findUserById(userId) {
       return {
         id: id,
         nombre: String(row[1] || "").trim(),
-        rol: String(row[2] || "").trim()
+        rol: String(row[2] || "").trim(),
+        fechaNacimiento: row[3] || ""
       };
     }
   }

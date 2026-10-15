@@ -21,13 +21,15 @@ function loginService(payload) {
       userId: sessionData.userId,
       userName: sessionData.userName,
       role: sessionData.role,
-      loginAt: sessionData.loginAt
+      loginAt: sessionData.loginAt,
+      isBirthdayToday: isBirthdayToday(user)
     }
   };
 }
 
 function verifySessionService(payload) {
   var session = decodeAndVerifyToken(payload.token);
+  var user = findUserById(session.userId);
 
   return {
     session: {
@@ -35,9 +37,31 @@ function verifySessionService(payload) {
       userId: session.userId,
       userName: session.userName,
       role: session.role,
-      loginAt: session.loginAt
+      loginAt: session.loginAt,
+      isBirthdayToday: isBirthdayToday(user)
     }
   };
+}
+
+function isBirthdayToday(user) {
+  var birthday = user && user.fechaNacimiento;
+  var birthdayMonthDay = "";
+
+  if (birthday instanceof Date && !isNaN(birthday.getTime())) {
+    birthdayMonthDay = Utilities.formatDate(birthday, Session.getScriptTimeZone(), "MM-dd");
+  } else {
+    var match = String(birthday || "").trim().match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+    if (match) {
+      birthdayMonthDay = String(match[2]).padStart(2, "0") + "-" + String(match[3]).padStart(2, "0");
+    }
+  }
+
+  if (!birthdayMonthDay) {
+    return false;
+  }
+
+  var todayMonthDay = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "MM-dd");
+  return birthdayMonthDay === todayMonthDay;
 }
 
 function logoutService(payload) {

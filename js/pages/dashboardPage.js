@@ -1,6 +1,6 @@
 import "../router.js";
 import { ROUTES } from "../config.js";
-import { getSession, logout } from "../services/authService.js";
+import { getSession, logout, refreshBirthdayStatus } from "../services/authService.js";
 import {
   clearCachedAvailableAreas,
   preloadAvailableAreas
@@ -8,6 +8,7 @@ import {
 
 const dashboardMessage = document.getElementById("dashboardMessage");
 const logoutButton = document.getElementById("logoutButton");
+const birthdayGreeting = document.getElementById("birthdayGreeting");
 const scanQrBtn = document.getElementById("scanQrBtn");
 const historyBtn = document.getElementById("historyBtn");
 const indicadoresBtn = document.getElementById("indicadoresBtn");
@@ -21,6 +22,22 @@ async function init() {
     window.location.replace(ROUTES.login);
     return;
   }
+
+  if (session.isBirthdayToday) {
+    showBirthdayGreeting(session);
+  }
+
+  refreshBirthdayStatus()
+    .then((isBirthdayToday) => {
+      if (isBirthdayToday) {
+        showBirthdayGreeting(session);
+      } else {
+        birthdayGreeting.hidden = true;
+      }
+    })
+    .catch((error) => {
+      console.error("No se pudo verificar el cumpleaños del usuario.", error);
+    });
 
   const areasPreload = preloadAvailableAreas(session.token, session.userId)
     .catch((error) => {
@@ -41,6 +58,12 @@ async function init() {
   checkListBtn.addEventListener("click", () => {
     window.location.href = ROUTES.checkList;
   });
+}
+
+function showBirthdayGreeting(session) {
+  const name = session.userName || session.userId || "";
+  birthdayGreeting.textContent = `¡Feliz cumpleaños${name ? `, ${name}` : ""}!`;
+  birthdayGreeting.hidden = false;
 }
 
 async function onLogout() {

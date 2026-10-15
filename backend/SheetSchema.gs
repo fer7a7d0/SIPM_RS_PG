@@ -12,7 +12,7 @@ var SHEET_NAMES = {
 };
 
 var SHEET_HEADERS = {
-  Usuarios: ["ID", "Nombre", "Rol"],
+  Usuarios: ["ID", "Nombre", "Rol", "Fecha nacimiento"],
   Operadores: ["ID", "Nombre", "Area", "Activo"],
   Areas: ["ID", "Area", "Codigo QR"],
   Preguntas: ["ID", "Categoria", "Pregunta", "Orden", "Obliga comentario", "Obliga fotografia"],

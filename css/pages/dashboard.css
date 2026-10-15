@@ -18,6 +18,16 @@
   min-height: 56px;
 }
 
+.birthday-greeting {
+  border: 1px solid #b7dfce;
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: #e9f7ef;
+  color: #0a6f56;
+  font-weight: 800;
+  text-align: center;
+}
+
 .dashboard-group {
   display: grid;
   gap: 14px;
@@ -405,6 +415,12 @@
 }
 
 @media (prefers-color-scheme: dark) {
+  .birthday-greeting {
+    border-color: #356452;
+    background: #19352c;
+    color: #a7e7c8;
+  }
+
   .dashboard-page {
     color: #e7f2ef;
   }
