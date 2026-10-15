@@ -7,6 +7,7 @@ const logoutButton = document.getElementById("logoutButton");
 const scanQrBtn = document.getElementById("scanQrBtn");
 const historyBtn = document.getElementById("historyBtn");
 const indicadoresBtn = document.getElementById("indicadoresBtn");
+const checkListBtn = document.getElementById("checkListBtn");
 
 init();
 
@@ -26,6 +27,9 @@ async function init() {
   });
   indicadoresBtn.addEventListener("click", () => {
     window.location.href = ROUTES.indicadores;
+  });
+  checkListBtn.addEventListener("click", () => {
+    window.location.href = ROUTES.checkList;
   });
 }
 

@@ -16,5 +16,6 @@ export const ROUTES = {
   scanQr: "escaner.html",
   supervision: "supervision.html",
   resumen: "resumen.html",
-  historial: "historial.html"
+  historial: "historial.html",
+  checkList: "check-list.html"
 };
