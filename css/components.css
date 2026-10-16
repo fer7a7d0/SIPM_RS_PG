@@ -5,6 +5,12 @@
   padding: 0.78rem 0.9rem;
 }
 
+.form-select:disabled {
+  color: var(--ink-700);
+  background-color: var(--surface);
+  opacity: 1;
+}
+
 .form-control:focus,
 .form-select:focus {
   border-color: rgba(14, 141, 109, 0.8);
