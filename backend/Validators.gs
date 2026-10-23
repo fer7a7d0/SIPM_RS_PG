@@ -84,6 +84,11 @@ function validateSupervisionChecklistPayload(payload) {
 function validateSupervisionSavePayload(payload) {
   validateTokenPayload(payload);
 
+  var submissionId = String((payload && payload.submissionId) || "").trim();
+  if (!/^[A-Za-z0-9-]{1,100}$/.test(submissionId)) {
+    throw buildError("Identificador de supervision no valido", "BAD_REQUEST");
+  }
+
   var areaId = String((payload && payload.areaId) || "").trim();
   if (!areaId) {
     throw buildError("Area requerida para guardar", "BAD_REQUEST");

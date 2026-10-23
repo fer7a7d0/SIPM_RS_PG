@@ -841,6 +841,32 @@ function supervisionChecklistService(payload) {
 
 function supervisionSaveService(payload) {
   var session = decodeAndVerifyToken(payload.token);
+  var lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+
+  try {
+    return saveSupervisionOnce(payload, session);
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function saveSupervisionOnce(payload, session) {
+  var submissionId = String(payload.submissionId || "").trim();
+  var supervisionId = "SUPV-" + submissionId;
+  var existingSupervision = findSupervisionById(supervisionId);
+  if (existingSupervision) {
+    if (existingSupervision.supervisor !== session.userId) {
+      throw buildError("Identificador de supervision ya utilizado", "DUPLICATE_SUPERVISION");
+    }
+
+    return {
+      saved: true,
+      supervisionId: supervisionId,
+      alreadySaved: true
+    };
+  }
+
   var areaId = String(payload.areaId || "").trim();
   var area = findAreaById(areaId);
   if (!area) {
@@ -860,22 +886,8 @@ function supervisionSaveService(payload) {
   }
 
   var completion = buildCompletionDataFromDates(startDate, endDate);
-  var supervisionId = "SUPV-" + Utilities.formatDate(endDate, Session.getScriptTimeZone(), "yyyyMMddHHmmss") + "-" + String(Math.floor(Math.random() * 900) + 100);
   var effectiveChecklist = buildEffectiveChecklistForArea(areaId);
   var effectiveQuestions = effectiveChecklist.questions || [];
-
-  appendSupervisionRow({
-    id: supervisionId,
-    fecha: completion.fecha,
-    horaInicio: completion.horaInicio,
-    horaFin: completion.horaFin,
-    duracion: completion.duracion,
-    supervisor: session.userId,
-    area: areaId,
-    gps: String(payload.gps || "").trim(),
-    operatorId: operator.id,
-    operatorName: operator.nombre
-  });
 
   var answersById = {};
   var answers = payload.answers || [];
@@ -918,6 +930,19 @@ function supervisionSaveService(payload) {
       throw buildError("La pregunta " + question.id + " requiere fotografia", "CHECKLIST_REQUIRED_PHOTO");
     }
   }
+
+  appendSupervisionRow({
+    id: supervisionId,
+    fecha: completion.fecha,
+    horaInicio: completion.horaInicio,
+    horaFin: completion.horaFin,
+    duracion: completion.duracion,
+    supervisor: session.userId,
+    area: areaId,
+    gps: String(payload.gps || "").trim(),
+    operatorId: operator.id,
+    operatorName: operator.nombre
+  });
 
   var photosStored = 0;
   for (var m = 0; m < effectiveQuestions.length; m += 1) {

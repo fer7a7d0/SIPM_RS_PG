@@ -1,7 +1,7 @@
 import "../router.js";
 import { ROUTES } from "../config.js";
 import { getSession } from "../services/authService.js";
-import { clearActiveSupervision, getActiveSupervision, saveSupervision } from "../services/supervisionService.js";
+import { clearActiveSupervision, getActiveSupervision, saveSupervision, updateActiveSupervision } from "../services/supervisionService.js";
 import { formatDateEs, formatTimeEs } from "../utils/dateTime.js";
 
 const summaryList = document.getElementById("summaryList");
@@ -10,6 +10,8 @@ const summaryMessage = document.getElementById("summaryMessage");
 
 let session = null;
 let active = null;
+let saveInProgress = false;
+let saveComplete = false;
 
 init();
 
@@ -57,9 +59,19 @@ function renderSummary() {
 }
 
 async function onSave() {
+  if (saveInProgress || saveComplete) {
+    return;
+  }
+
+  saveInProgress = true;
+  saveBtn.disabled = true;
+
   try {
-    saveBtn.disabled = true;
     setMessage("Guardando supervision...", "");
+
+    if (!active.submissionId) {
+      active = updateActiveSupervision({ submissionId: crypto.randomUUID() });
+    }
 
     const payloadAnswers = Object.values(active.answers || {}).map((item) => ({
       questionId: item.questionId,
@@ -76,16 +88,21 @@ async function onSave() {
       gps: active.gps,
       startMode: active.startMode,
       startAt: active.startAt,
+      submissionId: active.submissionId,
       answers: payloadAnswers
     });
 
+    saveComplete = true;
     clearActiveSupervision();
     setMessage("Supervision guardada correctamente.", "success");
     window.location.replace(ROUTES.dashboard);
   } catch (error) {
     setMessage(error.message || "No se pudo guardar la supervision.", "error");
   } finally {
-    saveBtn.disabled = false;
+    saveInProgress = false;
+    if (!saveComplete) {
+      saveBtn.disabled = false;
+    }
   }
 }
 
