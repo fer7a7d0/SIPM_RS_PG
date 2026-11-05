@@ -23,6 +23,22 @@ export async function verifySession() {
   }
 }
 
+// Devuelve false solo si el servidor confirma que la sesión no es válida.
+// Ante fallos de red se asume válida para no bloquear el uso sin conexión.
+export async function isSessionStillValid() {
+  const session = getSession();
+  if (!session || !session.token) {
+    return false;
+  }
+
+  try {
+    const data = await apiRequest("auth.session", { token: session.token });
+    return Boolean(data && data.session);
+  } catch (error) {
+    return !error.isBusinessError;
+  }
+}
+
 export async function refreshBirthdayStatus() {
   const session = getSession();
   if (!session || !session.token) {

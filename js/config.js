@@ -7,7 +7,8 @@ export const APP_CONFIG = {
 export const STORAGE_KEYS = {
   session: "sipm_supervision_session",
   activeSupervision: "sipm_active_supervision",
-  availableAreas: "sipm_available_areas"
+  availableAreas: "sipm_available_areas",
+  sessionNotice: "sipm_session_notice"
 };
 
 export const ROUTES = {

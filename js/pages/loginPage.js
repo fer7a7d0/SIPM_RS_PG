@@ -1,5 +1,5 @@
 import "../router.js";
-import { ROUTES } from "../config.js";
+import { ROUTES, STORAGE_KEYS } from "../config.js";
 import { login } from "../services/authService.js";
 import { validateUserId } from "../utils/validators.js";
 
@@ -9,6 +9,12 @@ const loginButton = document.getElementById("loginButton");
 const loginMessage = document.getElementById("loginMessage");
 
 form.addEventListener("submit", onSubmit);
+
+const sessionNotice = sessionStorage.getItem(STORAGE_KEYS.sessionNotice);
+if (sessionNotice) {
+  sessionStorage.removeItem(STORAGE_KEYS.sessionNotice);
+  setMessage(sessionNotice, "error");
+}
 
 async function onSubmit(event) {
   event.preventDefault();

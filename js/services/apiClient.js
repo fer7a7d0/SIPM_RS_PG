@@ -16,7 +16,9 @@ export async function apiRequest(action, payload = {}) {
 
   const data = await response.json();
   if (!data.success) {
-    throw new Error(data.message || "Error de negocio.");
+    const businessError = new Error(data.message || "Error de negocio.");
+    businessError.isBusinessError = true;
+    throw businessError;
   }
 
   return data.data;
