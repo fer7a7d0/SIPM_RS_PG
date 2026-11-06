@@ -16,6 +16,7 @@ const kpiDayHallazgos = document.getElementById("kpiDayHallazgos");
 const kpiWeekHallazgos = document.getElementById("kpiWeekHallazgos");
 const kpiMonthHallazgos = document.getElementById("kpiMonthHallazgos");
 const supervisorTableBody = document.querySelector("#supervisorTable tbody");
+const supervisorFindingsTableBody = document.querySelector("#supervisorFindingsTable tbody");
 const operatorTableBody = document.querySelector("#operatorTable tbody");
 const trendChart = document.getElementById("trendChart");
 const trendChartEmpty = document.getElementById("trendChartEmpty");
@@ -86,7 +87,9 @@ function renderSummary(summary, selectedMonth) {
     "dayFindingsCard",
     "weekFindingsCard",
     "supervisorDayHeader",
-    "supervisorWeekHeader"
+    "supervisorWeekHeader",
+    "supervisorFindingsDayHeader",
+    "supervisorFindingsWeekHeader"
   ].forEach((id) => {
     document.getElementById(id).classList.toggle("d-none", !showCurrentPeriods);
   });
@@ -106,6 +109,7 @@ function renderSummary(summary, selectedMonth) {
   kpiMonthHallazgos.textContent = String(month.hallazgosTotales ?? "-");
 
   renderSupervisorTable(summary.bySupervisor || [], showCurrentPeriods);
+  renderSupervisorFindingsTable(summary.bySupervisor || [], showCurrentPeriods);
   renderOperatorTable(summary.byOperator || []);
   renderTrendTable(summary.findingsTrend || [], monthLabel);
   renderAreaTable(summary.areaRanking || []);
@@ -308,6 +312,37 @@ function renderSupervisorTable(rows, showCurrentPeriods) {
       <td>${complianceLabel}</td>
     `;
     supervisorTableBody.appendChild(tr);
+  });
+}
+
+function renderSupervisorFindingsTable(rows, showCurrentPeriods) {
+  supervisorFindingsTableBody.innerHTML = "";
+
+  if (!rows.length) {
+    const columnCount = showCurrentPeriods ? 4 : 2;
+    supervisorFindingsTableBody.innerHTML = `<tr><td colspan="${columnCount}" class="text-muted">Sin datos</td></tr>`;
+    return;
+  }
+
+  const sortedRows = [...rows].sort((a, b) => {
+    return (Number(b.month?.hallazgosTotales ?? 0) - Number(a.month?.hallazgosTotales ?? 0))
+      || String(a.supervisorName || a.supervisorId || "").localeCompare(String(b.supervisorName || b.supervisorId || ""));
+  });
+
+  sortedRows.forEach((row) => {
+    const tr = document.createElement("tr");
+    const values = [row.supervisorName || row.supervisorId || "-"];
+    if (showCurrentPeriods) {
+      values.push(row.day?.hallazgosTotales ?? "-", row.week?.hallazgosTotales ?? "-");
+    }
+    values.push(row.month?.hallazgosTotales ?? "-");
+
+    values.forEach((value) => {
+      const cell = document.createElement("td");
+      cell.textContent = String(value);
+      tr.appendChild(cell);
+    });
+    supervisorFindingsTableBody.appendChild(tr);
   });
 }
 
