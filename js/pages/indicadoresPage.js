@@ -139,6 +139,7 @@ function renderOperatorFindingPareto(data) {
   const totalHallazgos = Number(data.totalHallazgos || 0);
   const coveredHallazgos = Number(data.coveredHallazgos || 0);
   const coveredPct = Number(data.coveredPct || 0);
+  const paretoOperatorCount = Number(data.paretoOperatorCount ?? operators.length);
 
   operatorFindingParetoTableBody.innerHTML = "";
   if (!operators.length) {
@@ -148,9 +149,19 @@ function renderOperatorFindingPareto(data) {
   }
 
   operatorFindingParetoSummary.textContent =
-    `${coveredHallazgos} de ${totalHallazgos} hallazgos (${coveredPct}%) concentrados en ${operators.length} operadores.`;
+    `${coveredHallazgos} de ${totalHallazgos} hallazgos (${coveredPct}%) concentrados en ${paretoOperatorCount} operadores.`;
 
-  operators.forEach((operator) => {
+  const sortedOperators = [...operators].sort((a, b) => {
+    const findingDifference = Number(b.hallazgosTotales || 0) - Number(a.hallazgosTotales || 0);
+    if (findingDifference !== 0) {
+      return findingDifference;
+    }
+    return String(a.operatorName || a.operatorId || "").localeCompare(
+      String(b.operatorName || b.operatorId || "")
+    );
+  });
+
+  sortedOperators.forEach((operator) => {
     const findings = operator.findings || [];
     findings.forEach((finding, index) => {
       const tr = document.createElement("tr");
