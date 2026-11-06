@@ -309,7 +309,6 @@
   .dashboard-summary-grid,
   .dashboard-two-column-grid,
   .dashboard-two-column-grid-wide-first,
-  .dashboard-stack-grid,
   .dashboard-analysis-layout,
   .dashboard-ranking-grid {
     grid-template-columns: minmax(0, 1fr);
@@ -407,7 +406,23 @@
 
   .dashboard-ranking-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: start;
+  }
+
+  .operator-card-container {
+    position: relative;
+    min-width: 0;
+  }
+
+  #operatorKpiBlock {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #operatorKpiBlock .table-wrap {
+    min-height: 0;
+    overflow: auto;
   }
 
   .dashboard-two-column-grid-wide-first {
