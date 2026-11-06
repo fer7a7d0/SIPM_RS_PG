@@ -109,7 +109,7 @@ function renderSummary(summary, selectedMonth) {
   renderOperatorTable(summary.byOperator || []);
   renderTrendTable(summary.findingsTrend || [], monthLabel);
   renderAreaTable(summary.areaRanking || []);
-  renderOperatorRankingTable(summary.operatorRanking || []);
+  renderOperatorRankingTable(summary.byOperator || []);
   renderFindingTypeRankingTable(summary.findingTypeRanking || []);
   renderFindingRankingTable(summary.findingRanking || []);
   renderOperatorFindingPareto(summary.operatorFindingPareto || {});
@@ -212,16 +212,29 @@ function renderOperatorRankingTable(rows) {
   operatorRankingTableBody.innerHTML = "";
 
   if (!rows.length) {
-    operatorRankingTableBody.innerHTML = '<tr><td colspan="3" class="text-muted">Sin datos</td></tr>';
+    operatorRankingTableBody.innerHTML = '<tr><td colspan="4" class="text-muted">Sin datos</td></tr>';
     return;
   }
 
-  rows.forEach((row) => {
+  const sortedRows = [...rows].sort((a, b) => {
+    const aRatio = a.supervisionesFinalizadas > 0 ? a.hallazgosTotales / a.supervisionesFinalizadas : -1;
+    const bRatio = b.supervisionesFinalizadas > 0 ? b.hallazgosTotales / b.supervisionesFinalizadas : -1;
+    return bRatio - aRatio
+      || (b.hallazgosTotales - a.hallazgosTotales)
+      || (b.supervisionesFinalizadas - a.supervisionesFinalizadas)
+      || String(a.operatorName || a.operatorId || "").localeCompare(String(b.operatorName || b.operatorId || ""));
+  });
+
+  sortedRows.slice(0, 10).forEach((row) => {
     const tr = document.createElement("tr");
+    const findingsPerSupervision = row.supervisionesFinalizadas > 0
+      ? (row.hallazgosTotales / row.supervisionesFinalizadas).toFixed(2)
+      : "-";
     tr.innerHTML = `
       <td>${row.operatorName || row.operatorId || "-"}</td>
       <td>${row.hallazgosTotales ?? "-"}</td>
       <td>${row.supervisionesFinalizadas ?? "-"}</td>
+      <td>${findingsPerSupervision}</td>
     `;
     operatorRankingTableBody.appendChild(tr);
   });
