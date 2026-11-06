@@ -2,10 +2,9 @@ import "../router.js";
 import { ROUTES } from "../config.js";
 import { getSession } from "../services/authService.js";
 import { validateQrCode } from "../services/qrService.js";
-import { listAvailableAreas, startSupervision } from "../services/supervisionService.js";
+import { startSupervision } from "../services/supervisionService.js";
 import { formatGps, getCurrentPosition } from "../utils/geo.js";
 
-const qrInput = document.getElementById("qrInput");
 const gpsStatus = document.getElementById("gpsStatus");
 const scannerMessage = document.getElementById("scannerMessage");
 const startCameraBtn = document.getElementById("startCameraBtn");
@@ -19,14 +18,9 @@ let activeSession = null;
 let gpsPosition = null;
 let qrScanner = null;
 let cameraActive = false;
-let isSupervisorMode = false;
 let isSubmitting = false;
 let lastProcessedQr = "";
 let successAnimationTimer = null;
-
-function updateValidateButtonState() {
-  // El flujo manual sigue usando el proceso de validación sin necesitar un botón visible.
-}
 
 init();
 
@@ -38,61 +32,28 @@ async function init() {
   }
 
   activeSession = localSession;
-  isSupervisorMode = String(activeSession.role || "").trim().toLowerCase() === "supervisor";
 
-  setupQrMode();
   setQrControlsEnabled(false);
   setPreviewVisible(true);
-  showScannerPlaceholder("Presiona iniciar cámara QR");
+  showScannerPlaceholder("Iniciando cámara...");
   setFlowState("waiting-gps", "Esperando ubicacion GPS...");
 
   startCameraBtn.addEventListener("click", startCamera);
   stopCameraBtn.addEventListener("click", stopCamera);
-  qrInput.addEventListener("change", () => {
-    const selectedValue = String(qrInput.value || "").trim();
-    if (selectedValue) {
-      processQrCode(selectedValue);
-    }
-  });
-
-  await loadQrCodeOptions();
   await captureGps();
   window.addEventListener("beforeunload", () => {
     stopCamera();
   });
 }
 
-async function loadQrCodeOptions() {
-  try {
-    const areas = await listAvailableAreas(activeSession.token);
-    qrInput.innerHTML = '<option value="">Selecciona un area...</option>';
-    areas
-      .filter((area) => area.qrCode)
-      .forEach((area) => {
-        const option = document.createElement("option");
-        option.value = area.qrCode;
-        option.textContent = area.name;
-        qrInput.appendChild(option);
-      });
-  } catch (error) {
-    // La lista queda con el placeholder si no se pueden cargar las areas.
-  }
-}
-
-function setupQrMode() {
-  qrInput.disabled = isSupervisorMode;
-}
-
 function setQrControlsEnabled(enabled) {
   const canInteract = Boolean(enabled) && !isSubmitting;
-  const shouldDisableInput = isSupervisorMode || !canInteract || !gpsPosition;
   const showCameraButtons = Boolean(gpsPosition) && !isSubmitting;
 
   startCameraBtn.disabled = !canInteract || cameraActive;
   stopCameraBtn.disabled = !canInteract || !cameraActive;
-  startCameraBtn.classList.toggle("d-none", !showCameraButtons);
+  startCameraBtn.classList.toggle("d-none", !showCameraButtons || cameraActive);
   stopCameraBtn.classList.toggle("d-none", !showCameraButtons || !cameraActive);
-  qrInput.disabled = shouldDisableInput;
 }
 
 async function captureGps() {
@@ -102,7 +63,8 @@ async function captureGps() {
     gpsPosition = await getCurrentPosition();
     gpsStatus.textContent = `GPS activo: ${formatGps(gpsPosition)} (±${Math.round(gpsPosition.accuracy)}m)`;
     setQrControlsEnabled(true);
-    setFlowState("ready", "GPS listo. Puedes usar la cámara o ingresar el QR manualmente.");
+    setFlowState("ready", "GPS listo. Iniciando cámara...");
+    void startCamera();
   } catch (error) {
     gpsPosition = null;
     setQrControlsEnabled(false);
@@ -115,9 +77,7 @@ async function captureGps() {
 async function processQrCode(rawValue) {
   const qrCode = String(rawValue || "").trim();
   if (!qrCode) {
-    if (!isSupervisorMode) {
-      setMessage("Escanea o ingresa un codigo QR valido.", "error");
-    }
+    setMessage("Escanea un codigo QR valido.", "error");
     return;
   }
 
@@ -156,7 +116,6 @@ async function onValidateAndStart(qrCode) {
 
     const area = await validateQrCode(activeSession.token, qrCode);
 
-    qrInput.value = qrCode;
     setValidationState(true, true);
     setPreviewVisible(false);
     setFlowState("launching", "Iniciando supervisión...");
@@ -218,7 +177,6 @@ async function startCamera() {
       { facingMode: "environment" },
       { fps: 10, qrbox: { width: 240, height: 240 } },
       (decodedText) => {
-        qrInput.value = decodedText;
         setPreviewVisible(false);
         setFlowState("validating", "QR detectado. Validando área...");
         setMessage("QR detectado. Validando área...", "");
@@ -231,7 +189,7 @@ async function startCamera() {
 
     cameraActive = true;
     setQrControlsEnabled(Boolean(gpsPosition));
-    setFlowState("camera-active", "Cámara lista. Enfoca el QR o usa el ingreso manual.");
+    setFlowState("camera-active", "Cámara lista. Enfoca el QR.");
   } catch (error) {
     setFlowState("error", "No se pudo iniciar la camara.");
     setMessage("No se pudo iniciar la camara.", "error");
@@ -257,7 +215,7 @@ async function stopCamera() {
   cameraActive = false;
   setQrControlsEnabled(Boolean(gpsPosition));
   setPreviewVisible(false);
-  setFlowState("ready", "Cámara detenida. Puedes volver a iniciar cuando quieras.");
+  setFlowState("ready", "Cámara detenida. Puedes iniciarla nuevamente cuando quieras.");
 }
 
 function setPreviewVisible(visible) {
@@ -290,7 +248,7 @@ function setValidationState(enabled, success = false) {
     successAnimationTimer = null;
   }
 
-  const targets = [qrInput, qrReader, gpsCard, startCameraBtn, stopCameraBtn];
+  const targets = [qrReader, gpsCard, startCameraBtn, stopCameraBtn];
 
   targets.forEach((element) => {
     if (!element) {
