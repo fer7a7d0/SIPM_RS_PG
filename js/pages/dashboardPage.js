@@ -35,9 +35,7 @@ async function init() {
     showBirthdayGreeting(session);
   }
 
-  if (!(await validateSessionAndBirthday())) {
-    return;
-  }
+  void validateSessionAndBirthday();
 
   const areasPreload = preloadAvailableAreas(session.token, session.userId)
     .catch((error) => {
