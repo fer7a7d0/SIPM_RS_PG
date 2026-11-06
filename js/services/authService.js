@@ -23,36 +23,34 @@ export async function verifySession() {
   }
 }
 
-// Devuelve false solo si el servidor confirma que la sesión no es válida.
-// Ante fallos de red se asume válida para no bloquear el uso sin conexión.
-export async function isSessionStillValid() {
+// Los fallos de red conservan la sesión local; los errores de negocio la invalidan.
+export async function refreshSessionStatus({ refreshBirthday = false } = {}) {
   const session = getSession();
   if (!session || !session.token) {
-    return false;
+    return { isValid: false, session: null };
   }
 
   try {
     const data = await apiRequest("auth.session", { token: session.token });
-    return Boolean(data && data.session);
+    const refreshedSession = data && data.session;
+    if (!refreshedSession || refreshedSession.userId !== session.userId) {
+      return { isValid: false, session: null };
+    }
+
+    const updatedSession = {
+      ...refreshedSession,
+      isBirthdayToday: refreshBirthday
+        ? Boolean(refreshedSession.isBirthdayToday)
+        : Boolean(session.isBirthdayToday)
+    };
+    setJson(STORAGE_KEYS.session, updatedSession);
+    return { isValid: true, session: updatedSession, refreshed: true };
   } catch (error) {
-    return !error.isBusinessError;
+    if (error.isBusinessError) {
+      return { isValid: false, session: null };
+    }
+    return { isValid: true, session, error, refreshed: false };
   }
-}
-
-export async function refreshBirthdayStatus() {
-  const session = getSession();
-  if (!session || !session.token) {
-    return false;
-  }
-
-  const data = await apiRequest("auth.session", { token: session.token });
-  const refreshedSession = data.session;
-  if (!refreshedSession || refreshedSession.userId !== session.userId) {
-    throw new Error("No se pudo verificar el usuario de la sesión.");
-  }
-
-  setJson(STORAGE_KEYS.session, refreshedSession);
-  return Boolean(refreshedSession.isBirthdayToday);
 }
 
 export function getSession() {
