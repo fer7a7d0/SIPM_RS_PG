@@ -680,11 +680,11 @@ function buildOperatorFindingPareto(answers, monthItems) {
     return String(a.operatorName || "").localeCompare(String(b.operatorName || ""));
   });
 
-  var includedOperators = [];
+  var paretoOperatorCount = 0;
   var coveredHallazgos = 0;
 
   for (var k = 0; k < rows.length; k += 1) {
-    includedOperators.push(rows[k]);
+    paretoOperatorCount += 1;
     coveredHallazgos += rows[k].hallazgosTotales;
     if (coveredHallazgos >= totalHallazgos * 0.5) {
       break;
@@ -695,7 +695,8 @@ function buildOperatorFindingPareto(answers, monthItems) {
     totalHallazgos: totalHallazgos,
     coveredHallazgos: coveredHallazgos,
     coveredPct: toPercent(coveredHallazgos, totalHallazgos) || 0,
-    operators: includedOperators
+    paretoOperatorCount: paretoOperatorCount,
+    operators: rows
   };
 }
 
